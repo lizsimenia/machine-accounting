@@ -80,9 +80,11 @@ def choose_feature(lines:list, start:int, end:int) -> int:
         elif feature[:len('Тип пассажирского транспорта')] == 'Тип пассажирского транспорта':
             cur_type = feature[len('Тип пассажирского транспорта: '):-1]
             pattern_car = pattern_cars.pattern_passenger['Тип пассажирского транспорта'][cur_type]
+            continue
         elif feature[:len('Грузоподъемность')] == 'Грузоподъемность':
             cur_cargo = feature[len('Грузоподъемность: '):-1]
             pattern_car= pattern_cars.pattern_cargo['Грузоподъемность'][cur_cargo]
+            continue
         if end-1 >= i >= start+4:
             num+=1
             list_features.append(feature)
@@ -244,23 +246,58 @@ def change():
     :rtype: list
     :return:
     """
+    flag = 0
     while True:
+        if flag == 1:
+            break
         num = input("Введите номер машины: ")
         if check_num_car(num):
             if find_index_str(num):
                 start, end, lines = find_index_str(num)
-                changed_line, pattern_car, list_features, index_feature = choose_feature(lines, start, end)
-                print("Внесите измнение:")
+                changed_line, pattern_car, list_features, index_feature= choose_feature(lines, start, end)
+                print("Внесите измненения:")
                 feature = ''
                 for sym in list_features[index_feature-1]:
-                    if sym!= ':':
+                    if sym == " " and feature == "":
+                        continue
+                    elif sym!= ':':
                         feature += sym
+                    else:
+                        break
                 try:
-                    key = pattern_car[feature[:-1]]
+                    key = pattern_car[feature]
+                    while True:
+                        new_data = input(f'{feature}: ')
+                        if is_digit(new_data):
+                            if len(key) == 2:
+                                if check_a_num_choice(float(new_data), max(key), min(key)):
+                                    new_line = f'{feature}: {new_data}'
+                                    break
+                            else:
+                                new_line = f'{feature}: {new_data}'
+                                break
                 except Exception:
-                    key = pattern_car['Габариты'][feature[:-1]]
+                    try:
+                        key = pattern_car['Габариты'][feature]
+                        while True:
+                            new_data = input(f'{feature}: ')
+                            if is_digit(new_data):
+                                if len(key) == 2:
+                                    if check_a_num_choice(float(new_data), max(key), min(key)):
+                                        new_line = f'{feature}: {new_data}'
+                                        break
+                                else:
+                                    new_line = f'{feature}: {new_data}'
+                                    break
+                    except Exception:
+                        key = feature
+                        new_line = f'{feature}: {make_a_choice(key, pattern_characteristic.info_pattern[feature])}'
+                del lines[changed_line]
+                lines[changed_line] = new_line+'\n'
+                with open("accounting.txt", "w", encoding="UTF-8") as file:
+                    file.writelines(lines)
 
-                new_data = input(f'{key}: ')
+                flag = 1
 
 
 
