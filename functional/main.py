@@ -4,15 +4,15 @@ from typing import Callable, Any, Dict
 
 def check_num_car(text:str) -> bool:
     '''Функция проверки корректности номера машины'''
-    if len(text) == 8:
-        try:
-            if text[0] in 'АВЕКМНОРСТУХ' and (0 <= int(text[1:4]) < 1000)\
+    try:
+        if len(text) >= 8\
+            and text[0] in 'АВЕКМНОРСТУХ' and (0 <= int(text[1:4]) < 1000)\
             and text[4] in 'АВЕКМНОРСТУХ'\
             and text[5] in 'АВЕКМНОРСТУХ'and (0 <= int(text[-2:]) < 1000):
                 return 1
-        except Exception:
-            print("ERROR: некорректный номер машины")
-    print("ERROR: некорректный номер машины")
+        else: raise Exception
+    except Exception:
+        print("ERROR: некорректный номер машины")
 
 def is_no_spec(text:str) -> Any:
     ''' Функция проверки ввода на отсутствие спец символов'''
