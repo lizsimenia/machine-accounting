@@ -71,16 +71,31 @@ def choose_feature(lines:list, start:int, end:int) -> int:
     возвращает номер строки, которую нужно изменить
     '''
     print("Выберите характеристику для изменения:")
-    k = 0
+    list_features = []
+    num = 0
     for i, feature in enumerate(lines):
-        if end >= i >= start+4:
-            print(f"{feature} ({i+1})")
-            k+=1
+        if feature[:len('Назначение')] == 'Назначение':
+            cur_purpose = feature[len('Назначение: '):-1]
+            pattern_car = pattern_characteristic.info_pattern['Назначение'][cur_purpose]
+        elif feature[:len('Тип пассажирского транспорта')] == 'Тип пассажирского транспорта':
+            cur_type = feature[len('Тип пассажирского транспорта: '):-1]
+            pattern_car = pattern_cars.pattern_passenger['Тип пассажирского транспорта'][cur_type]
+        elif feature[:len('Грузоподъемность')] == 'Грузоподъемность':
+            cur_cargo = feature[len('Грузоподъемность: '):-1]
+            pattern_car= pattern_cars.pattern_cargo['Грузоподъемность'][cur_cargo]
+        if end-1 >= i >= start+4:
+            num+=1
+            list_features.append(feature)
+            if feature == "Габариты: \n":
+                print(feature[:-1])
+                continue
+            print(f"{feature[:-1]}({num})")
+
     while True:
-        choice = input("Введите номер характеристики")
+        choice = input("Введите номер характеристики: ")
         if is_digit(choice):
-            if check_a_num_choice(choice, k):
-                return start + 4 + choice-1
+            if check_a_num_choice(int(choice), len(list_features)):
+                return start + 4 + int(choice)-1, pattern_car, list_features, int(choice)
 
 def make_a_choice(key:str, data:None) -> int:
     """
@@ -234,7 +249,20 @@ def change():
         if check_num_car(num):
             if find_index_str(num):
                 start, end, lines = find_index_str(num)
-                choose_feature(lines, start, end)
+                changed_line, pattern_car, list_features, index_feature = choose_feature(lines, start, end)
+                print("Внесите измнение:")
+                feature = ''
+                for sym in list_features[index_feature-1]:
+                    if sym!= ':':
+                        feature += sym
+                try:
+                    key = pattern_car[feature[:-1]]
+                except Exception:
+                    key = pattern_car['Габариты'][feature[:-1]]
+
+                new_data = input(f'{key}: ')
+
+
 
 def saving()->None:
     """
