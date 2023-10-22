@@ -1,4 +1,3 @@
-# TODO: подключить файл со всеми словарями и брать инфу из него
 import pattern_cars, pattern_characteristic
 from typing import Callable, Any, Dict
 
@@ -39,7 +38,11 @@ def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
         return 1
     print("ERROR: введите корректное число\n")
 
-def find_index_str(num:str):
+def find_index_str(num:str) -> Any:
+    """
+    Функция находит начальный и конечный индекс строк,
+    относящиеся к машине с заданным номером
+    """
     try:
         with open("accounting.txt", "r", encoding="UTF-8") as file:
             lines = file.readlines()
@@ -66,10 +69,9 @@ def find_index_str(num:str):
         raise FileNotFoundError("В учёте нет ни одного автомобиля.")
 
 def choose_feature(lines:list, start:int, end:int) -> int:
-    '''
+    """
     Функция выбора одной из характеристик машины для изменения
-    возвращает номер строки, которую нужно изменить
-    '''
+    """
     print("Выберите характеристику для изменения:")
     list_features = []
     num = 0
@@ -170,7 +172,7 @@ def spec_add_char(info_temp: Dict, root: str)-> None:
                                 break
 
 
-def adding():
+def adding()->None:
     """
     Функция добавления машины в учёт
 
@@ -224,7 +226,7 @@ def removal()->None:
                     file.writelines(lines)
                     break
 
-def display():
+def display()->None:
     """
     Функция вывода учёта машин
 
@@ -237,15 +239,8 @@ def display():
         for s in output_file:
             print(s)
 
-def change():
-    """
-    Функция изменения характеристики машины в учёте
-
-    задает и добавляет характеристики машины
-
-    :rtype: list
-    :return:
-    """
+def change()->None:
+    '''Функция изменения характеристики машины в учёте'''
     flag = 0
     while True:
         if flag == 1:
@@ -332,26 +327,28 @@ def menu():
           \n Отображение всего учёта (3)\
           \n Изменение характеристик машины (4)\
           \n Сохранение изменений (5)")
-    act = int(input("\n Выберите команду (введите её номер): "))
-
-    if act == 0:
-        return 0
-    elif act == 1:
-        print("\nДОБАВЛЕНИЕ МАШИНЫ В УЧЁТ\n")
-        adding()
-    elif act == 2:
-        print("\nУДАЛЕНИЕ МАШИНЫ ИЗ УЧЁТА\n")
-        removal()
-    elif act == 3:
-        print("\nОТОБРАЖЕНИЕ ВСЕГО УЧЁТА\n")
-        display()
-    elif act == 4:
-        print("\nИЗМЕНЕНИЕ ХАРАКТЕРИСТИКИ МАШИНЫ\n")
-        change()
-    elif act == 5:
-        print("\nСОХРАНЕНИЕ ИЗМЕНЕНИЙ\n")
-        saving()
-    else:
+    try:
+        act = int(input("\n Выберите команду (введите её номер): "))
+        if act == 0:
+            return 0
+        elif act == 1:
+            print("\nДОБАВЛЕНИЕ МАШИНЫ В УЧЁТ\n")
+            adding()
+        elif act == 2:
+            print("\nУДАЛЕНИЕ МАШИНЫ ИЗ УЧЁТА\n")
+            removal()
+        elif act == 3:
+            print("\nОТОБРАЖЕНИЕ ВСЕГО УЧЁТА\n")
+            display()
+        elif act == 4:
+            print("\nИЗМЕНЕНИЕ ХАРАКТЕРИСТИКИ МАШИНЫ\n")
+            change()
+        elif act == 5:
+            print("\nСОХРАНЕНИЕ ИЗМЕНЕНИЙ\n")
+            saving()
+        else:
+            raise Exception
+    except:
         print(f"\n\t Такой команды не существует!")
 
 accounting_info = []
