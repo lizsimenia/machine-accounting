@@ -39,6 +39,49 @@ def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
         return 1
     print("ERROR: введите корректное число\n")
 
+def find_index_str(num:str):
+    try:
+        with open("accounting.txt", "r", encoding="UTF-8") as file:
+            lines = file.readlines()
+
+        paragraph_start = f"Номер машины: {num}\n"
+        paragraph_end = "\n"
+
+        start_index = None
+        end_index = None
+
+        for i, line in enumerate(lines):
+            if line == paragraph_start:
+                start_index = i
+            elif line == paragraph_end:
+                if start_index != None:
+                    end_index = i
+                    break
+
+        if start_index is not None and end_index is not None:
+            return start_index, end_index, lines
+        else:
+            print("ERROR: автомобиля с таким номером не существует")
+    except FileNotFoundError:
+        raise FileNotFoundError("В учёте нет ни одного автомобиля.")
+
+def choose_feature(lines:list, start:int, end:int) -> int:
+    '''
+    Функция выбора одной из характеристик машины для изменения
+    возвращает номер строки, которую нужно изменить
+    '''
+    print("Выберите характеристику для изменения:")
+    k = 0
+    for i, feature in enumerate(lines):
+        if end >= i >= start+4:
+            print(f"{feature} ({i+1})")
+            k+=1
+    while True:
+        choice = input("Введите номер характеристики")
+        if is_digit(choice):
+            if check_a_num_choice(choice, k):
+                return start + 4 + choice-1
+
 def make_a_choice(key:str, data:None) -> int:
     """
     Функция задания характеристики из списка
@@ -148,8 +191,7 @@ def adding():
 
 
 
-def removal():
-    # TODO:
+def removal()->None:
     """
     Функция удаления машины из учета
 
@@ -158,33 +200,12 @@ def removal():
     while True:
         num = input("Введите номер машины: ")
         if check_num_car(num):
-            break
-    try:
-        with open("accounting.txt", "r", encoding="UTF-8") as file:
-            lines = file.readlines()
-
-        paragraph_start = f"Номер машины: {num}\n"
-        paragraph_end = "\n"
-
-        start_index = None
-        end_index = None
-
-        for i, line in enumerate(lines):
-            if line == paragraph_start:
-                start_index = i
-            elif line == paragraph_end:
-                end_index = i
-                break
-
-        if start_index is not None and end_index is not None:
-            del lines[start_index:end_index+1]
-            with open("accounting.txt", "w", encoding="UTF-8") as file:
-                file.writelines(lines)
-        else:
-            print("ERROR: ")
-
-    except FileNotFoundError:
-        raise FileNotFoundError("В учёте нет ни одного автомобиля.")
+            if find_index_str(num):
+                start, end, lines = find_index_str(num)
+                del lines[start:end+1]
+                with open("accounting.txt", "w", encoding="UTF-8") as file:
+                    file.writelines(lines)
+                    break
 
 def display():
     """
@@ -199,7 +220,7 @@ def display():
         for s in output_file:
             print(s)
 
-def change(init_list):
+def change():
     """
     Функция изменения характеристики машины в учёте
 
@@ -208,7 +229,12 @@ def change(init_list):
     :rtype: list
     :return:
     """
-    pass
+    while True:
+        num = input("Введите номер машины: ")
+        if check_num_car(num):
+            if find_index_str(num):
+                start, end, lines = find_index_str(num)
+                choose_feature(lines, start, end)
 
 def saving()->None:
     """
@@ -216,7 +242,7 @@ def saving()->None:
 
     задает и добавляет характеристики машины
     """
-    with open('accounting.txt', 'w', encoding='UTF8') as output_file:
+    with open('accounting.txt', 'a', encoding='UTF8') as output_file:
         for cars in accounting_info:
             for key, value in cars.items():
                 if isinstance(value, dict):
