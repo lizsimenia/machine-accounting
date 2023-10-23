@@ -20,12 +20,13 @@ def is_no_spec(text:str) -> Any:
     for elem in text:
         if elem in spec:
             print('ERROR: можно вводить только буквы и цифры')
+            return 0
     return 1
 
 def is_digit(num:str) -> float:
     ''' Функция проверки ввода на число '''
     try:float(num)
-    except Exception: print('ERROR: введите число\n')
+    except Exception: print('ERROR: введите число')
     else: return float(num)
 
 def is_word(text:str) -> bool:
@@ -36,13 +37,10 @@ def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
     '''Функция проверки числа на ограничения'''
     if num <= limit_1 and num  >= limit_2:
         return 1
-    print("ERROR: введите корректное число\n")
+    print("ERROR: введите корректное число")
 
 def find_index_str(num:str) -> Any:
-    """
-    Функция находит начальный и конечный индекс строк,
-    относящиеся к машине с заданным номером
-    """
+    '''Функция нахождения начального и конечного индексов строк характеристик по номеру машины'''
     try:
         with open("accounting.txt", "r", encoding="UTF-8") as file:
             lines = file.readlines()
@@ -120,12 +118,7 @@ def make_a_choice(key:str, data:None) -> int:
     return choice
 
 def set_size(dict_characteristic:Dict, info_temp:Dict, characteristic:str) -> None:
-    """
-    Функция установки габаритов машины
-
-    запрашивает длину, ширину, высоту
-    или расстояние от подвески до земли
-    """
+    '''Функция установки габаритов машины'''
     for elem in dict_characteristic[characteristic].keys():
         while True:
             info_temp[characteristic][elem] = input(f'  {elem}: ')
@@ -138,14 +131,8 @@ def set_size(dict_characteristic:Dict, info_temp:Dict, characteristic:str) -> No
                 else:
                     break
 
-
 def spec_add_char(info_temp: Dict, root: str)-> None:
-    """
-    Функция добавления характеристик с ограничениями,
-    зависящие от назначения автомобили
-
-    добавляет новые характеристики машине
-    """
+    '''Функция добавления характеристик с ограничениями'''
     dict_characteristic = root
     for characteristic in dict_characteristic:
         if characteristic == 'Габариты':
@@ -170,14 +157,21 @@ def spec_add_char(info_temp: Dict, root: str)-> None:
                                           break
                             else:
                                 break
+        elif isinstance(dict_characteristic[characteristic], list):
+            while True:
+                info_temp[characteristic] = input(f'{characteristic}: ')
+                if is_digit(info_temp[characteristic]):
+                    if len(dict_characteristic[characteristic]) == 2:
+                        if check_a_num_choice(float(info_temp[characteristic]),
+                                              max(dict_characteristic[characteristic]),
+                                            min(dict_characteristic[characteristic])):
+                            break
+                    else:
+                        break
 
 
 def adding()->None:
-    """
-    Функция добавления машины в учёт
-
-    задает и добавляет характеристики машины
-    """
+    '''Функция добавления машины в учёт'''
     info_temp = pattern_characteristic.info_pattern.copy()
     for characteristic in pattern_characteristic.info_pattern.keys():
         if characteristic == 'Назначение':
@@ -211,11 +205,7 @@ def adding()->None:
 
 
 def removal()->None:
-    """
-    Функция удаления машины из учета
-
-    удаляет все характеристики по номеру машины
-    """
+    '''Функция удаления машины из учета'''
     while True:
         num = input("Введите номер машины: ")
         if check_num_car(num):
@@ -227,14 +217,7 @@ def removal()->None:
                     break
 
 def display()->None:
-    """
-    Функция вывода учёта машин
-
-    выводит характеристики каждой машины
-
-    :rtype: list
-    :return:
-    """
+    '''Функция вывода учёта машин'''
     with open('accounting.txt', 'r', encoding='UTF8') as output_file:
         for s in output_file:
             print(s)
@@ -297,11 +280,7 @@ def change()->None:
 
 
 def saving()->None:
-    """
-    Функция добавления машины в учёт
-
-    задает и добавляет характеристики машины
-    """
+    '''Функция форматированного добавления машины в файл'''
     with open('accounting.txt', 'a', encoding='UTF8') as output_file:
         for cars in accounting_info:
             for key, value in cars.items():
@@ -317,8 +296,8 @@ def menu():
     """
     Функция вызова меню
 
-    выбирает одно из предложенных действий,
-    выполняет соотвествующую функцию выбранного действия
+    выборка одного из предложенных действий,
+    выполение соотвествующей функции выбранного действия
     """
     print(f"\n MENU\n\
           \n Выйти из меню (0)\
