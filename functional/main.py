@@ -75,7 +75,8 @@ def choose_feature(lines:list, start:int, end:int) -> int:
     print("Выберите характеристику для изменения:")
     list_features = []
     lines_temp = lines[start:end]
-    num = 0
+    num,choice_add = 0, 0
+    warn2 = None
     for i, feature in enumerate(lines_temp):
         if feature[:len('Назначение')] == 'Назначение':
             cur_purpose = feature[len('Назначение: '):-1]
@@ -83,10 +84,14 @@ def choose_feature(lines:list, start:int, end:int) -> int:
         elif feature[:len('Тип пассажирского транспорта')] == 'Тип пассажирского транспорта':
             cur_type = feature[len('Тип пассажирского транспорта: '):-1]
             pattern_car = pattern_cars.pattern_passenger['Тип пассажирского транспорта'][cur_type]
+            warn2=num
+            choice_add = 1
             continue
         elif feature[:len('Грузоподъемность')] == 'Грузоподъемность':
             cur_cargo = feature[len('Грузоподъемность: '):-1]
             pattern_car= pattern_cars.pattern_cargo['Грузоподъемность'][cur_cargo]
+            choice_add = 1
+            warn2=num
             continue
         if end-1 >= i+start >= start+4:
             num+=1
@@ -104,7 +109,9 @@ def choose_feature(lines:list, start:int, end:int) -> int:
             if check_a_num_choice(int(choice), len(list_features)-1):
                 if int(choice) >= warn:
                     choice = int(choice) + 1
-                return start + 4 + int(choice), pattern_car, pattern_car_init, list_features, int(choice)-1
+                if warn != None and int(choice) < warn2:
+                    choice_add -= 1
+                return start + 4 + int(choice) + choice_add, pattern_car, pattern_car_init, list_features, int(choice)-1
 
 def make_a_choice(key:str, data:None) -> int:
     """
