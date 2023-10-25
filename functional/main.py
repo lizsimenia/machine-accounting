@@ -31,7 +31,9 @@ def is_digit(num:str) -> float:
 
 def is_word(text:str) -> bool:
     ''' Функция проверки ввода только букв'''
-    return text.isalpha()
+    alfa = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+    return all(i in alfa for i in text)
+    # return text.isalpha()
 
 def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
     '''Функция проверки числа на ограничения'''
@@ -72,11 +74,12 @@ def choose_feature(lines:list, start:int, end:int) -> int:
     """
     print("Выберите характеристику для изменения:")
     list_features = []
+    lines_temp = lines[start:end]
     num = 0
-    for i, feature in enumerate(lines):
+    for i, feature in enumerate(lines_temp):
         if feature[:len('Назначение')] == 'Назначение':
             cur_purpose = feature[len('Назначение: '):-1]
-            pattern_car = pattern_characteristic.info_pattern['Назначение'][cur_purpose]
+            pattern_car_init = pattern_characteristic.info_pattern['Назначение'][cur_purpose]
         elif feature[:len('Тип пассажирского транспорта')] == 'Тип пассажирского транспорта':
             cur_type = feature[len('Тип пассажирского транспорта: '):-1]
             pattern_car = pattern_cars.pattern_passenger['Тип пассажирского транспорта'][cur_type]
@@ -85,19 +88,23 @@ def choose_feature(lines:list, start:int, end:int) -> int:
             cur_cargo = feature[len('Грузоподъемность: '):-1]
             pattern_car= pattern_cars.pattern_cargo['Грузоподъемность'][cur_cargo]
             continue
-        if end-1 >= i >= start+4:
+        if end-1 >= i+start >= start+4:
             num+=1
             list_features.append(feature)
             if feature == "Габариты: \n":
+                warn = num
                 print(feature[:-1])
-                continue
-            print(f"{feature[:-1]}({num})")
+                num-=1
+            else:
+                print(f"{feature[:-1]} ({num})")
 
     while True:
         choice = input("Введите номер характеристики: ")
         if is_digit(choice):
-            if check_a_num_choice(int(choice), len(list_features)):
-                return start + 4 + int(choice)-1, pattern_car, list_features, int(choice)
+            if check_a_num_choice(int(choice), len(list_features)-1):
+                if int(choice) >= warn:
+                    choice = int(choice) + 1
+                return start + 4 + int(choice), pattern_car, pattern_car_init, list_features, int(choice)-1
 
 def make_a_choice(key:str, data:None) -> int:
     """
@@ -232,10 +239,10 @@ def change()->None:
         if check_num_car(num):
             if find_index_str(num):
                 start, end, lines = find_index_str(num)
-                changed_line, pattern_car, list_features, index_feature= choose_feature(lines, start, end)
+                changed_line, pattern_car, pattern_car_init, list_features, index_feature= choose_feature(lines, start, end)
                 print("Внесите измненения:")
                 feature = ''
-                for sym in list_features[index_feature-1]:
+                for sym in list_features[index_feature]:
                     if sym == " " and feature == "":
                         continue
                     elif sym!= ':':
@@ -243,7 +250,7 @@ def change()->None:
                     else:
                         break
                 try:
-                    key = pattern_car[feature]
+                    key = pattern_car_init[feature]
                     while True:
                         new_data = input(f'{feature}: ')
                         if is_digit(new_data):
@@ -256,7 +263,7 @@ def change()->None:
                                 break
                 except Exception:
                     try:
-                        key = pattern_car['Габариты'][feature]
+                        key = pattern_car[feature]
                         while True:
                             new_data = input(f'{feature}: ')
                             if is_digit(new_data):
@@ -268,10 +275,22 @@ def change()->None:
                                     new_line = f'{feature}: {new_data}'
                                     break
                     except Exception:
-                        key = feature
-                        new_line = f'{feature}: {make_a_choice(key, pattern_characteristic.info_pattern[feature])}'
-                del lines[changed_line]
-                lines[changed_line] = new_line+'\n'
+                        try:
+                            key = pattern_car['Габариты'][feature]
+                            while True:
+                                new_data = input(f'{feature}: ')
+                                if is_digit(new_data):
+                                    if len(key) == 2:
+                                        if check_a_num_choice(float(new_data), max(key), min(key)):
+                                            new_line = f'{feature}: {new_data}'
+                                            break
+                                    else:
+                                        new_line = f'{feature}: {new_data}'
+                                        break
+                        except Exception:
+                            key = feature
+                            new_line = f'{feature}: {make_a_choice(key, pattern_characteristic.info_pattern[feature])}'
+                lines[changed_line-1] = new_line+'\n'
                 with open("accounting.txt", "w", encoding="UTF-8") as file:
                     file.writelines(lines)
 
