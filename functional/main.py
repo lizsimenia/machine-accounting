@@ -41,26 +41,37 @@ def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
         return 1
     print("ERROR: введите корректное число")
 
+def search_num(num:str) -> int:
+    '''Функция нахождения машины по ее номеру'''
+    with open("accounting.txt", "r", encoding="UTF-8") as file:
+        lines = file.readlines()
+    paragraph_start = f"Номер машины: {num}\n"
+    paragraph_end = "\n"
+
+    start_index = None
+    end_index = None
+
+    for i, line in enumerate(lines):
+        if line == paragraph_start:
+            start_index = i
+        elif line == paragraph_end:
+            if start_index != None:
+                end_index = i
+                break
+    return start_index, end_index, lines
+
+def unique_num(num:str)->bool:
+    '''Функция проверки единственности номера'''
+    try:
+        start_index, end_index, lines = search_num(num)
+        return start_index == None and end_index == None
+    except Exception:
+        return 1
+
 def find_index_str(num:str) -> Any:
     '''Функция нахождения начального и конечного индексов строк характеристик по номеру машины'''
     try:
-        with open("accounting.txt", "r", encoding="UTF-8") as file:
-            lines = file.readlines()
-
-        paragraph_start = f"Номер машины: {num}\n"
-        paragraph_end = "\n"
-
-        start_index = None
-        end_index = None
-
-        for i, line in enumerate(lines):
-            if line == paragraph_start:
-                start_index = i
-            elif line == paragraph_end:
-                if start_index != None:
-                    end_index = i
-                    break
-
+        start_index, end_index, lines = search_num(num)
         if start_index is not None and end_index is not None:
             return start_index, end_index, lines
         else:
@@ -76,6 +87,7 @@ def choose_feature(lines:list, start:int, end:int) -> int:
     list_features = []
     lines_temp = lines[start:end]
     num,choice_add = 0, 0
+    pattern_car = None
     warn2 = None
     for i, feature in enumerate(lines_temp):
         if feature[:len('Назначение')] == 'Назначение':
@@ -109,8 +121,10 @@ def choose_feature(lines:list, start:int, end:int) -> int:
             if check_a_num_choice(int(choice), len(list_features)-1):
                 if int(choice) >= warn:
                     choice = int(choice) + 1
-                if warn != None and int(choice) < warn2:
+                if warn2 != None and int(choice) < warn2:
                     choice_add -= 1
+                if pattern_car == None:
+                    pattern_car = pattern_car_init
                 return start + 4 + int(choice) + choice_add, pattern_car, pattern_car_init, list_features, int(choice)-1
 
 def make_a_choice(key:str, data:None) -> int:
@@ -205,7 +219,9 @@ def adding()->None:
                                 print("ERROR: название производителя может состоять только из букв")
                         elif characteristic == 'Номер машины':
                             if check_num_car(info_temp[characteristic]):
-                                break
+                                if unique_num(info_temp[characteristic]):
+                                    break
+                                else: print("ERROR: машина с таким номером существует в файле.")
                         else:
                             break
         elif isinstance(info_temp[characteristic], list):
