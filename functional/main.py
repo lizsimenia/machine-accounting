@@ -322,17 +322,19 @@ def change()->None:
 
 
 def saving()->None:
-    '''Функция форматированного добавления машины в файл'''
-    with open('accounting.txt', 'a', encoding='UTF8') as output_file:
+    '''Функция сохранения информации о машине в файл'''
+    flag = 0
+    with open('accounting.py', 'r', encoding='UTF8') as output_file:
+        lines = output_file.readlines()
+    with open('accounting.py', 'a', encoding='UTF8') as output_file:
         for cars in accounting_info:
-            for key, value in cars.items():
-                if isinstance(value, dict):
-                    output_file.write(key + ': '+'\n')
-                    for i in value.keys():
-                        output_file.write('  ' + i + ': ' + str(value[i]) +'\n')
-                else:
-                    output_file.write(key + ': ' +  str(value)+'\n')
-            output_file.write("\n")
+            for line in lines:
+                if f'car_{cars["Номер машины"]}' in line:
+                    flag = 1
+                    break
+            if flag == 0:
+                output_file.write(f'car_{cars["Номер машины"]} = {str(cars)}\n')
+        output_file.write('\n')
 
 def menu():
     """
