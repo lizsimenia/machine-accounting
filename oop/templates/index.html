@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Учёт машин</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#add-car-btn').click(function() {
+                $('#add-car-modal').modal('show');
+            });
+
+            $('#save-car-btn').click(function() {
+                var number = $('#number').val();
+                var model = $('#model').val();
+                var manufacturer = $('#manufacturer').val();
+                var year = $('#year').val();
+                var drive_type = $('#drive-type').val();
+                // Добавьте обработку других полей по аналогии
+
+                $.ajax({
+                    url: '/add_car',
+                    type: 'POST',
+                    data: {
+                        'number': number,
+                        'model': model,
+                        'manufacturer': manufacturer,
+                        'year': year,
+                        'drive_type': drive_type
+                        // Добавьте остальные поля сюда
+                    },
+                    success: function(response) {
+                        alert(response['message']);
+                        location.reload();
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Учёт машин</h1>
+    <button id="add-car-btn">Добавить машину</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Модель</th>
+                <th>Производитель</th>
+                <th>Год</th>
+                <th>Тип привода</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for car in cars %}
+                <tr>
+                    <td>{{ car['number'] }}</td>
+                    <td>{{ car['model'] }}</td>
+                    <td>{{ car['manufacturer'] }}</td>
+                    <td>{{ car['year'] }}</td>
+                    <td>{{ car['drive_type'] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Диалоговое окно для добавления машины -->
+    <div id="add-car-modal" style="display: none;">
+        <input type="text" id="number" placeholder="Номер"><br>
+        <input type="text" id="model" placeholder="Модель"><br>
+        <input type="text" id="manufacturer" placeholder="Производитель"><br>
+        <input type="text" id="year" placeholder="Год"><br>
+        <input type="text" id="drive-type" placeholder="Тип привода"><br>
+        <!-- Добавьте поля для остальных характеристик машины здесь -->
+        <button id="save-car-btn">Сохранить изменения</button>
+    </div>
+</body>
+</html>
