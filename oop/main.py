@@ -1,4 +1,25 @@
-# purpose = {pattern_cargo, pattern_passenger, pattern_cargo_passenger,pattern_special}
+from typing import Callable, Any, Dict, Self
+
+from tkinter import *
+
+root = Tk()
+root.title("machine accounting")
+root.geometry("800x600")
+
+# Create a list of options for the dropdown menu
+options = ["грузовой", "пассажирский", "грузопассажирский", "специальный"]
+
+# Create a StringVar to store the selected option
+selected_option = StringVar(root)
+selected_option.set(options[0])  # Set the default option
+
+# Create the OptionMenu widget and add it to the window
+option_menu = OptionMenu(root, selected_option, *options)
+option_menu.pack()
+
+# Add more widgets and event handlers here
+
+root.mainloop()
 
 
 class Parking:
@@ -32,13 +53,50 @@ class Car:
     Methods:
 
     """
-    def __init__(self, num_car, manufacturer, the_lineup, year, purpose):
-        self.manufacturer = manufacturer
-        self.the_lineup = the_lineup
-        self.year = year
-        self.purpose = purpose
+    def __init__(self):
+        self.numcar = self.set_numcar()
+        self.manufacturer = self.set_manufacturer()
+        self.the_lineup = self.set_lineup()
+        self.year = self.set_year()
+        self.purpose = self.set_purpose()
 
-        self.characteristics = {}
+
+    def check_numcar(self, text:str) -> Any:
+        '''Функция проверки корректности номера машины'''
+        try:
+            if len(text) >= 8\
+                and text[0] in 'АВЕКМНОРСТУХ' and (0 <= int(text[1:4]) < 1000)\
+                and text[4] in 'АВЕКМНОРСТУХ'\
+                and text[5] in 'АВЕКМНОРСТУХ'and (0 <= int(text[-2:]) < 1000):
+                    return 1
+            else: raise Exception
+        except Exception:
+            print("ERROR: некорректный номер машины")
+
+    def set_numcar(self)->Any:
+        '''Сеттер номера машины'''
+        num =  input("Номер машины: ")
+        if self.check_numcar(num):
+            return num
+
+    def set_manufacturer(self):
+        '''Сеттер производителя'''
+        data = input("Производитель: ")
+        return data
+
+    def set_lineup(self):
+        '''Сеттер модельного ряда'''
+        pass
+
+    def set_year(self):
+        '''Сеттер года выпуска машины'''
+        pass
+
+    def set_purpose(self):
+        '''Сеттер назначения машины'''
+        data = input("Назначение: ")
+        #выборка назначений из выходящего списка
+        pass
 
     def get_characteristic(self, key):
         return self.characteristics.get(key)
@@ -60,6 +118,8 @@ class Car:
         print(f"\nХАРАКТЕРИСТИКИ {self.make} {self.model} ({self.year}):")
         for key, value in self.characteristics.items():
             print(f"{key}: {value}")
+
+Car()
 
 class CargoCar(Car):
     """
