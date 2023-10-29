@@ -60,12 +60,13 @@ def unique_num(num:str)->bool:
     except Exception:
         return 1
 
-def find_index_str(num:str) -> Any:
-    '''Функция нахождения начального и конечного индексов строк характеристик по номеру машины'''
+def find_characteristic(num:str) -> Any:
+    '''Функция нахождения характеристик по номеру машины'''
     try:
-        start_index, end_index, lines = search_num(num)
-        if start_index is not None and end_index is not None:
-            return start_index, end_index, lines
+        index = search_num(num)
+        if index is not None:
+            with open("accounting.py", "r", encoding="UTF-8") as file:
+                return index-1, file.readlines()[index-1]
         else:
             print("ERROR: автомобиля с таким номером не существует")
     except FileNotFoundError:
