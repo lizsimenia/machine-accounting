@@ -1,5 +1,7 @@
 import pattern_cars, pattern_characteristic
 from typing import Callable, Any, Dict
+from accounting import *
+path = 'C:/Users/Li Za/Desktop/study/engineering/labs/cars/functional/accounting.py'
 
 def check_num_car(text:str) -> bool:
     '''Функция проверки корректности номера машины'''
@@ -33,7 +35,6 @@ def is_word(text:str) -> bool:
     ''' Функция проверки ввода только букв'''
     alfa = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
     return all(i in alfa for i in text)
-    # return text.isalpha()
 
 def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
     '''Функция проверки числа на ограничения'''
@@ -44,7 +45,7 @@ def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
 def search_num(num:str) -> int:
     '''Функция нахождения машины по ее номеру'''
     index_num, index= 0, None
-    with open("accounting.py", "r", encoding="UTF-8") as file:
+    with open(path, "r", encoding="UTF-8") as file:
         for line in file:
             index_num += 1
             if num in line:
@@ -65,60 +66,54 @@ def find_characteristic(num:str) -> Any:
     try:
         index = search_num(num)
         if index is not None:
-            with open("accounting.py", "r", encoding="UTF-8") as file:
-                return index-1, file.readlines()[index-1]
+            with open(path, "r", encoding="UTF-8") as file:
+                return index-1, file.readlines()
         else:
             print("ERROR: автомобиля с таким номером не существует")
     except FileNotFoundError:
         raise FileNotFoundError("В учёте нет ни одного автомобиля.")
 
-def choose_feature(lines:list, start:int, end:int) -> int:
+def choose_feature(num:str) -> int:
     """
     Функция выбора одной из характеристик машины для изменения
     """
     print("Выберите характеристику для изменения:")
+    variable_name = f'car_{num}'
+    car = globals()[variable_name]
     list_features = []
-    lines_temp = lines[start:end]
-    num,choice_add = 0, 0
+
+    num= 0
     pattern_car = None
-    warn2 = None
-    for i, feature in enumerate(lines_temp):
-        if feature[:len('Назначение')] == 'Назначение':
-            cur_purpose = feature[len('Назначение: '):-1]
-            pattern_car_init = pattern_characteristic.info_pattern['Назначение'][cur_purpose]
-        elif feature[:len('Тип пассажирского транспорта')] == 'Тип пассажирского транспорта':
-            cur_type = feature[len('Тип пассажирского транспорта: '):-1]
-            pattern_car = pattern_cars.pattern_passenger['Тип пассажирского транспорта'][cur_type]
-            warn2=num
-            choice_add = 1
+    for i, feature in enumerate(car):
+        if feature == 'Назначение':
+            pattern_car_init = pattern_characteristic.info_pattern['Назначение'][car['Назначение']]
+        elif feature == 'Тип пассажирского транспорта':
+            pattern_car = pattern_cars.pattern_passenger['Тип пассажирского транспорта'][car['Тип пассажирского транспорта']]
             continue
-        elif feature[:len('Грузоподъемность')] == 'Грузоподъемность':
-            cur_cargo = feature[len('Грузоподъемность: '):-1]
-            pattern_car= pattern_cars.pattern_cargo['Грузоподъемность'][cur_cargo]
-            choice_add = 1
-            warn2=num
+        elif feature == 'Грузоподъемность':
+            pattern_car= pattern_cars.pattern_cargo['Грузоподъемность'][car['Грузоподъемность']]
             continue
-        if end-1 >= i+start >= start+4:
+        if i >= 4:
             num+=1
-            list_features.append(feature)
-            if feature == "Габариты: \n":
-                warn = num
-                print(feature[:-1])
-                num-=1
+            if feature == "Габариты":
+                print(feature)
+                for elem in car['Габариты']:
+                    print(f"{elem} ({num})")
+                    list_features.append(elem)
+                    num += 1
+                    if elem == 'Расстояние от подвески до земли(см)':
+                        num -= 1
             else:
-                print(f"{feature[:-1]} ({num})")
+                list_features.append(feature)
+                print(f"{feature} ({num})")
 
     while True:
         choice = input("Введите номер характеристики: ")
         if is_digit(choice):
             if check_a_num_choice(int(choice), len(list_features)-1):
-                if int(choice) >= warn:
-                    choice = int(choice) + 1
-                if warn2 != None and int(choice) < warn2:
-                    choice_add -= 1
                 if pattern_car == None:
                     pattern_car = pattern_car_init
-                return start + 4 + int(choice) + choice_add, pattern_car, pattern_car_init, list_features, int(choice)-1
+                return pattern_car, pattern_car_init, list_features, int(choice)-1, car
 
 def make_a_choice(key:str, data:None) -> int:
     """
@@ -226,16 +221,15 @@ def adding()->None:
     accounting_info.append(info_temp)
 
 
-
 def removal()->None:
     '''Функция удаления машины из учета'''
     while True:
         num = input("Введите номер машины: ")
         if check_num_car(num):
-            if find_index_str(num):
-                start, end, lines = find_index_str(num)
-                del lines[start:end+1]
-                with open("accounting.txt", "w", encoding="UTF-8") as file:
+            if find_characteristic(num):
+                index, lines = find_characteristic(num)
+                del lines[index]
+                with open(path, "w", encoding="UTF-8") as file:
                     file.writelines(lines)
                     break
 
@@ -253,18 +247,11 @@ def change()->None:
             break
         num = input("Введите номер машины: ")
         if check_num_car(num):
-            if find_index_str(num):
-                start, end, lines = find_index_str(num)
-                changed_line, pattern_car, pattern_car_init, list_features, index_feature= choose_feature(lines, start, end)
+            if find_characteristic(num):
+                index, lines = find_characteristic(num)
+                pattern_car, pattern_car_init, list_features, index_feature, car= choose_feature(num)
                 print("Внесите измненения:")
-                feature = ''
-                for sym in list_features[index_feature]:
-                    if sym == " " and feature == "":
-                        continue
-                    elif sym!= ':':
-                        feature += sym
-                    else:
-                        break
+                feature = list_features[index_feature]
                 try:
                     key = pattern_car_init[feature]
                     while True:
@@ -272,10 +259,12 @@ def change()->None:
                         if is_digit(new_data):
                             if len(key) == 2:
                                 if check_a_num_choice(float(new_data), max(key), min(key)):
-                                    new_line = f'{feature}: {new_data}'
+                                    car[feature] = new_data
+                                    new_line = str(car)
                                     break
                             else:
-                                new_line = f'{feature}: {new_data}'
+                                car[feature] = new_data
+                                new_line = str(car)
                                 break
                 except Exception:
                     try:
@@ -285,10 +274,12 @@ def change()->None:
                             if is_digit(new_data):
                                 if len(key) == 2:
                                     if check_a_num_choice(float(new_data), max(key), min(key)):
-                                        new_line = f'{feature}: {new_data}'
+                                        car[feature] = new_data
+                                        new_line = str(car)
                                         break
                                 else:
-                                    new_line = f'{feature}: {new_data}'
+                                    car[feature] = new_data
+                                    new_line = str(car)
                                     break
                     except Exception:
                         try:
@@ -298,16 +289,19 @@ def change()->None:
                                 if is_digit(new_data):
                                     if len(key) == 2:
                                         if check_a_num_choice(float(new_data), max(key), min(key)):
-                                            new_line = f'{feature}: {new_data}'
+                                            car['Габариты'][feature] = new_data
+                                            new_line = str(car)
                                             break
                                     else:
-                                        new_line = f'{feature}: {new_data}'
+                                        car['Габариты'][feature] = new_data
+                                        new_line = str(car)
                                         break
                         except Exception:
                             key = feature
-                            new_line = f'{feature}: {make_a_choice(key, pattern_characteristic.info_pattern[feature])}'
-                lines[changed_line-1] = new_line+'\n'
-                with open("accounting.txt", "w", encoding="UTF-8") as file:
+                            car[feature] = make_a_choice(key, pattern_characteristic.info_pattern[feature])
+                            new_line = str(car)
+                lines[index-1] = f'car_{num} = ' + new_line+'\n'
+                with open(path, "w", encoding="UTF-8") as file:
                     file.writelines(lines)
 
                 flag = 1
@@ -316,9 +310,9 @@ def change()->None:
 
 def saving()->None:
     '''Функция сохранения информации о машине в файл'''
-    with open('accounting.py', 'r', encoding='UTF8') as output_file:
+    with open(path, 'r', encoding='UTF8') as output_file:
         lines = output_file.readlines()
-    with open('accounting.py', 'a', encoding='UTF8') as output_file:
+    with open(path, 'a', encoding='UTF8') as output_file:
         for cars in accounting_info:
             flag = 0
             for line in lines:
