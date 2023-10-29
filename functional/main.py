@@ -55,8 +55,8 @@ def search_num(num:str) -> int:
 def unique_num(num:str)->bool:
     '''Функция проверки единственности номера'''
     try:
-        start_index, end_index, lines = search_num(num)
-        return start_index == None and end_index == None
+        index = search_num(num)
+        return index == None
     except Exception:
         return 1
 
