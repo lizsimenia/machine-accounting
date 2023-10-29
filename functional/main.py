@@ -43,22 +43,14 @@ def check_a_num_choice(num:float, limit_1:float, limit_2=1) -> Any:
 
 def search_num(num:str) -> int:
     '''Функция нахождения машины по ее номеру'''
-    with open("accounting.txt", "r", encoding="UTF-8") as file:
-        lines = file.readlines()
-    paragraph_start = f"Номер машины: {num}\n"
-    paragraph_end = "\n"
-
-    start_index = None
-    end_index = None
-
-    for i, line in enumerate(lines):
-        if line == paragraph_start:
-            start_index = i
-        elif line == paragraph_end:
-            if start_index != None:
-                end_index = i
+    index_num, index= 0, None
+    with open("accounting.py", "r", encoding="UTF-8") as file:
+        for line in file:
+            index_num += 1
+            if num in line:
+                index = index_num
                 break
-    return start_index, end_index, lines
+    return index
 
 def unique_num(num:str)->bool:
     '''Функция проверки единственности номера'''
