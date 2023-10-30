@@ -235,9 +235,17 @@ def removal()->None:
 
 def display()->None:
     '''Функция вывода учёта машин'''
-    with open('accounting.txt', 'r', encoding='UTF8') as output_file:
-        for s in output_file:
-            print(s)
+    with open(path, 'r', encoding='UTF8') as output_file:
+        num = 1
+        for line in output_file.readlines():
+            variable_name = ''
+            for sym in line:
+                if sym == " ":
+                    break
+                variable_name += sym
+            car = globals()[variable_name]
+            print(num, car)
+            num += 1
 
 def change()->None:
     '''Функция изменения характеристики машины в учёте'''
